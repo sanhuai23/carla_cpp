@@ -24,16 +24,42 @@ link_directories(
 
 # GLOB 会产生一个由所有匹配表达式的文件组成的列表，并将其保存到libcarla_test_sources变量中
 # 包括 性能剖析器 和 测试模块（客户端/服务端）中的所有C++代码
+# 使用 file(GLOB) 命令来收集一系列文件路径，将匹配的文件路径列表存储在变量 libcarla_test_sources 中。
+# 这里收集的是 ${libcarla_source_path}/carla/profiler/ 目录下所有的.cpp 和.h 文件，也就是收集与性能分析器（profiler）相关的代码文件和头文件。
 file(GLOB libcarla_test_sources
     "${libcarla_source_path}/carla/profiler/*.cpp"
     "${libcarla_source_path}/carla/profiler/*.h"
+)
+
+# 继续向 libcarla_test_sources 变量中添加文件路径，这次收集的是 ${libcarla_source_path}/test/ 目录下所有的.cpp 和.h 文件，
+# 通常这里面会包含各种通用的测试相关的代码文件和头文件。
+file(GLOB libcarla_test_sources
+    # 上一轮收集的文件路径已经在变量中，这里继续追加新的匹配路径
+    APPEND
     "${libcarla_source_path}/test/*.cpp"
     "${libcarla_source_path}/test/*.h"
+)
+
+# 再向 libcarla_test_sources 变量中添加文件路径，这次收集的是 ${libcarla_source_path}/test/${carla_config}/ 目录下的所有.cpp 和.h 文件，
+# 其中 ${carla_config} 应该是一个自定义的配置相关变量，意味着会根据不同的配置收集对应测试目录下的代码文件和头文件。
+file(GLOB libcarla_test_sources
+    # 同样是追加新的匹配路径到变量中
+    APPEND
     "${libcarla_source_path}/test/${carla_config}/*.cpp"
     "${libcarla_source_path}/test/${carla_config}/*.h"
-    "${libcarla_source_path}/test/common/*.cpp"
-    "${libcarla_source_path}/test/common/*.h")
+)
 
+# 最后向 libcarla_test_sources 变量中添加文件路径，收集的是 ${libcarla_source_path}/test/common/ 目录下所有的.cpp 和.h 文件，
+# 这里的 common 目录通常存放一些多个测试都可能会用到的通用代码文件和头文件。
+file(GLOB libcarla_test_sources
+    # 继续追加路径到变量中
+    APPEND
+    "${libcarla_source_path}/test/common/*.cpp"
+    "${libcarla_source_path}/test/common/*.h"
+)
+
+# 同样使用 file(GLOB) 命令，不过这里是初始化一个空的文件路径列表存储在变量 libcarla_test_client_sources 中，
+# 可能后续会根据实际情况往这个变量里添加具体与测试客户端相关的文件路径，目前是空的状态。
 file(GLOB libcarla_test_client_sources "")
 
 # 如果LibCarla使用调试版本，则libcarla_test也是用调试版本
