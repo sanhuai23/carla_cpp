@@ -18,11 +18,23 @@ import os
 import sys
 
 try:
-    sys.path.append(glob.glob('../carla/dist/carla-*%d.%d-%s.egg' % (
+    # 尝试执行以下操作块，目的是将特定的路径添加到Python的模块搜索路径 `sys.path` 中，使得Python解释器能够在该路径下查找并导入相应的模块。
+
+    # 使用 `glob.glob` 函数来查找符合特定模式的文件路径。
+    # 这里构建的文件路径模式字符串为 `../carla/dist/carla-*%d.%d-%s.egg`，其中 `%d.%d-%s` 是格式化字符串占位符，会被替换为具体的值来匹配实际的文件路径。
+    # `sys.version_info.major` 用于获取当前Python版本的主版本号（例如Python 3.8中的3），`sys.version_info.minor` 则获取Python版本的次版本号（例如Python 3.8中的8）。
+    # 通过 `'win-amd64' if os.name == 'nt' else 'linux-x86_64'` 这样的条件表达式来根据操作系统类型进行适配，若操作系统是Windows（`os.name == 'nt'`），则 `%s` 会被替换为 `win-amd64`，否则（即操作系统为类Unix系统，如Linux）替换为 `linux-x86_64`。
+    # 最终，`glob.glob` 函数会在 `../carla/dist/` 目录下查找类似 `carla-<版本号>-<操作系统架构>.egg` 这种格式的文件路径，并返回一个包含所有匹配结果的列表（这个列表可能为空，也可能包含一个或多个元素）。
+    paths = glob.glob('../carla/dist/carla-*%d.%d-%s.egg' % (
         sys.version_info.major,
         sys.version_info.minor,
-        'win-amd64' if os.name == 'nt' else 'linux-x86_64'))[0])
+        'win-amd64' if os.name == 'nt' else 'linux-x86_64'))
+    # 从 `glob.glob` 函数返回的路径列表中取出第一个元素（索引为0的元素），并将其添加到 `sys.path` 中。
+    # 这里假设 `glob.glob` 返回的列表至少有一个元素，如果列表为空，那么下面这行代码尝试访问 `paths[0]` 时就会抛出 `IndexError` 异常。
+    sys.path.append(paths[0])
 except IndexError:
+    # 如果在上述 `try` 块的代码执行过程中抛出了 `IndexError` 异常（也就是 `glob.glob` 没有找到匹配的文件路径，返回的列表为空，导致访问 `paths[0]` 出错），
+    # 那么就会进入这个 `except` 块进行异常处理。在这里使用 `pass` 语句，表示不进行任何具体的操作，直接跳过异常处理，程序会继续往下执行，只是不会成功添加路径到 `sys.path` 而已。
     pass
 
 import carla
