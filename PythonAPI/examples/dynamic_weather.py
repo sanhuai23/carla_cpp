@@ -160,16 +160,47 @@ class Weather(object):
         self._storm = Storm(weather.precipitation)
 
     def tick(self, delta_seconds):
-        self._sun.tick(delta_seconds)
-        self._storm.tick(delta_seconds)
-        self.weather.cloudiness = self._storm.clouds
-        self.weather.precipitation = self._storm.rain
-        self.weather.precipitation_deposits = self._storm.puddles
-        self.weather.wind_intensity = self._storm.wind
-        self.weather.fog_density = self._storm.fog
-        self.weather.wetness = self._storm.wetness
-        self.weather.sun_azimuth_angle = self._sun.azimuth
-        self.weather.sun_altitude_angle = self._sun.altitude
+    # `tick` 函数可能用于整体更新环境相关的天气等属性，它接收 `delta_seconds` 参数，该参数通常表示时间间隔（单位可能是秒），用于体现从上一次更新到当前这次更新所经过的时间。
+
+    # 调用 `self._sun` 对象的 `tick` 方法，传入时间间隔 `delta_seconds`，目的是更新太阳相关的属性。
+    # 这里假设 `self._sun` 是一个与太阳相关的对象，并且其 `tick` 方法能够根据传入的时间间隔来改变太阳的方位角、高度角等属性（类似前面介绍过的 `Sun` 类的 `tick` 方法那样的功能），以模拟太阳随时间的动态变化情况。
+    self._sun.tick(delta_seconds)
+
+    # 调用 `self._storm` 对象的 `tick` 方法，同样传入时间间隔 `delta_seconds`，用于更新风暴（或代表天气变化相关的情况，从命名推测）相关的各种属性。
+    # 假设 `self._storm` 是一个包含如云层、降雨、风速等多种天气属性并且能根据时间动态更新这些属性的对象，通过调用其 `tick` 方法实现天气情况随时间的变化模拟。
+    self._storm.tick(delta_seconds)
+
+    # 将 `self._storm` 对象的 `clouds` 属性值赋给 `self.weather` 对象的 `cloudiness` 属性。
+    # 这意味着把代表风暴中云量情况的属性值传递给了 `self.weather` 所代表的整体天气状况中的云量属性，使得 `self.weather` 能准确反映当前云量相关的信息，实现不同对象间天气属性的关联和同步更新。
+    self.weather.cloudiness = self._storm.clouds
+
+    # 把 `self._storm` 对象的 `rain` 属性值赋给 `self.weather` 对象的 `precipitation` 属性，用于更新整体天气状况里的降水量（或降雨情况相关）属性。
+    # 这样 `self.weather` 的 `precipitation` 属性就能获取到最新的降雨相关信息，与 `self._storm` 所模拟的降雨情况保持一致，反映当前的实际降雨状态。
+    self.weather.precipitation = self._storm.rain
+
+    # 将 `self._storm` 对象的 `puddles` 属性值赋给 `self.weather` 对象的 `precipitation_deposits` 属性，更新天气状况中与降水沉积（比如地面的积水情况等，从命名和上下文推测）相关的属性。
+    # 通过这样赋值，`self.weather` 就能记录并展示与降水后产生的积水等沉积情况对应的信息，与 `self._storm` 所模拟的这方面情况同步更新。
+    self.weather.precipitation_deposits = self._storm.puddles
+
+    # 把 `self._storm` 对象的 `wind` 属性值赋给 `self.weather` 对象的 `wind_intensity` 属性，用于更新整体天气状况里的风速（或风力强度相关）属性。
+    # 使得 `self.weather` 的 `wind_intensity` 属性能反映当前的风速情况，与 `self._storm` 模拟的风速变化保持同步，体现当前真实的风力强度状态。
+    self.weather.wind_intensity = self._storm.wind
+
+    # 将 `self._storm` 对象的 `fog` 属性值赋给 `self.weather` 对象的 `fog_density` 属性，更新天气状况中雾的密度（或能见度相关，通常雾密度影响能见度）属性。
+    # 如此一来，`self.weather` 的 `fog_density` 属性就能获取到最新的雾相关信息，准确展示当前雾的浓密程度情况，与 `self._storm` 所模拟的雾情况相匹配。
+    self.weather.fog_density = self._storm.fog
+
+    # 把 `self._storm` 对象的 `wetness` 属性值赋给 `self.weather` 对象的 `wetness` 属性，更新整体天气状况里的潮湿程度属性。
+    # 这使得 `self.weather` 的 `wetness` 属性能体现当前环境的潮湿情况，和 `self._storm` 所模拟的湿度状态保持一致，反映真实的环境湿度水平。
+    self.weather.wetness = self._storm.wetness
+
+    # 将 `self._sun` 对象的 `azimuth` 属性值赋给 `self.weather` 对象的 `sun_azimuth_angle` 属性，更新天气状况中太阳的方位角属性。
+    # 从而让 `self.weather` 能准确记录太阳在天空中的方位情况，与 `self._sun` 所模拟的太阳方位变化同步，展示当前太阳所处的方位信息。
+    self.weather.sun_azimuth_angle = self._sun.azimuth
+
+    # 把 `self._sun` 对象的 `altitude` 属性值赋给 `self.weather` 对象的 `sun_altitude_angle` 属性，更新天气状况中太阳的高度角属性。
+    # 这样 `self.weather` 的 `sun_altitude_angle` 属性就能反映当前太阳的高度情况，与 `self._sun` 所模拟的太阳高度变化保持一致，呈现出太阳在天空中的实际高度信息。
+    self.weather.sun_altitude_angle = self._sun.altitude
 
     def __str__(self):
         return '%s %s' % (self._sun, self._storm)
