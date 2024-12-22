@@ -104,14 +104,32 @@ foreach(target ${build_targets})
 endforeach(target)
 
 # 构建调试版本
+# 判断是否定义了 LIBCARLA_BUILD_DEBUG 变量，若该变量为真（通常用于标识构建调试版本），则执行下面花括号内的代码块。
+# 这意味着下面的设置都是针对调试版本构建时的特定配置。
 if (LIBCARLA_BUILD_DEBUG)
-  # Specific options for debug.
-  set_target_properties(libcarla_test_${carla_config}_debug PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS_DEBUG}")
-  target_link_libraries(libcarla_test_${carla_config}_debug "carla_${carla_config}${carla_target_postfix}_debug")
-  target_compile_definitions(libcarla_test_${carla_config}_debug PUBLIC -DBOOST_ASIO_ENABLE_BUFFER_DEBUGGING)
-  if (CMAKE_BUILD_TYPE STREQUAL "Client")
-      target_link_libraries(libcarla_test_${carla_config}_debug "${BOOST_LIB_PATH}/libboost_filesystem.a")
-  endif()
+    # 以下是针对调试版本的特定选项设置部分的注释说明
+
+    # 设置名为 libcarla_test_${carla_config}_debug 的目标（可能是可执行文件或者库等）的编译属性，
+    # 将编译标志（COMPILE_FLAGS）设置为 ${CMAKE_CXX_FLAGS_DEBUG}，也就是使用 CMake 中预定义的 C++ 调试编译标志，
+    # 例如可能包含了开启调试信息生成、关闭优化等适合调试场景的编译选项。
+    set_target_properties(libcarla_test_${carla_config}_debug PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS_DEBUG}")
+
+    # 将名为 "carla_${carla_config}${carla_target_postfix}_debug" 的库链接到 libcarla_test_${carla_config}_debug 目标上，
+    # 这使得在构建 libcarla_test_${carla_config}_debug 时可以使用 "carla_${carla_config}${carla_target_postfix}_debug" 库中提供的功能，
+    # 其中 ${carla_config} 和 ${carla_target_postfix} 应该是项目中自定义的配置相关和目标后缀相关的变量。
+    target_link_libraries(libcarla_test_${carla_config}_debug "carla_${carla_config}${carla_target_postfix}_debug")
+
+    # 为 libcarla_test_${carla_config}_debug 目标添加编译定义（COMPILE_DEFINITIONS），这里定义了 BOOST_ASIO_ENABLE_BUFFER_DEBUGGING，
+    # 表示在编译时开启 Boost.Asio 库中缓冲区相关的调试功能（如果使用了 Boost.Asio 库的话），这样有助于排查相关的问题。
+    target_compile_definitions(libcarla_test_${carla_config}_debug PUBLIC -DBOOST_ASIO_ENABLE_BUFFER_DEBUGGING)
+
+    # 再进行一个条件判断，判断当前的 CMake 构建类型（CMAKE_BUILD_TYPE）是否等于 "Client"，如果是客户端构建类型，则执行下面花括号内的代码。
+    if (CMAKE_BUILD_TYPE STREQUAL "Client")
+        # 将位于 ${BOOST_LIB_PATH} 目录下的 libboost_filesystem.a 库链接到 libcarla_test_${carla_config}_debug 目标上，
+        # 这使得在客户端构建的调试版本中可以使用 Boost 文件系统库（libboost_filesystem.a）的功能，
+        # 例如进行文件操作相关的处理等，前提是项目中依赖了该库。
+        target_link_libraries(libcarla_test_${carla_config}_debug "${BOOST_LIB_PATH}/libboost_filesystem.a")
+    endif()
 endif()
 
 # 构建发布版本
