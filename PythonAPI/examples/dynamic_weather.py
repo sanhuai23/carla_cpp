@@ -94,19 +94,53 @@ class Storm(object):
         self.fog = 0.0
 
     def tick(self, delta_seconds):
-        delta = (1.3 if self._increasing else -1.3) * delta_seconds
-        self._t = clamp(delta + self._t, -250.0, 100.0)
-        self.clouds = clamp(self._t + 40.0, 0.0, 90.0)
-        self.rain = clamp(self._t, 0.0, 80.0)
-        delay = -10.0 if self._increasing else 90.0
-        self.puddles = clamp(self._t + delay, 0.0, 85.0)
-        self.wetness = clamp(self._t * 5, 0.0, 100.0)
-        self.wind = 5.0 if self.clouds <= 20 else 90 if self.clouds >= 70 else 40
-        self.fog = clamp(self._t - 10, 0.0, 30.0)
-        if self._t == -250.0:
-            self._increasing = True
-        if self._t == 100.0:
-            self._increasing = False
+    # `tick` 函数可能用于模拟天气或环境相关属性随时间变化的更新操作，它接收一个参数 `delta_seconds`，这个参数通常表示时间间隔（单位可能是秒），用于体现从上一次更新到当前这次更新所经过的时间。
+
+    # 根据当前对象的 `_increasing` 属性来确定一个变化量 `delta` 的值。
+    # 如果 `_increasing` 为 `True`，则 `delta` 的值为 `1.3 * delta_seconds`，表示相关属性要正向增加；如果 `_increasing` 为 `False`，则 `delta` 的值为 `-1.3 * delta_seconds`，意味着相关属性要反向减少。这里的 `1.3` 是设定的一个变化速率系数，用于控制属性随时间变化的快慢程度。
+    delta = (1.3 if self._increasing else -1.3) * delta_seconds
+
+    # 使用 `clamp` 函数（假设 `clamp` 函数是一个用于限制值在特定区间内的自定义函数或外部引入函数）对 `delta + self._t` 的结果进行限制，使其值始终保持在 `-250.0` 到 `100.0` 这个区间内。
+    # 这意味着 `self._t` 在更新时，会基于前面计算的 `delta` 进行变化，但不会超出这个规定的范围，保证了 `self._t` 这个属性值的有效性和合理性，可能 `self._t` 是一个综合影响多种天气或环境属性的基础变量。
+    self._t = clamp(delta + self._t, -250.0, 100.0)
+
+    # 根据更新后的 `self._t` 值来计算并更新 `self.clouds` 属性的值，同样使用 `clamp` 函数将计算结果限制在 `0.0` 到 `90.0` 的区间内。
+    # 从计算式 `self._t + 40.0` 可以推测，`self.clouds` 的值与 `self._t` 有一定关联，并且加上 `40.0` 以及进行区间限制后，能使其符合该属性表示云量（或与云相关的某种量化指标）在合理范围内变化的要求，例如 `0` 可能表示无云，`90` 表示多云等情况（具体含义需结合整体应用场景确定）。
+    self.clouds = clamp(self._t + 40.0, 0.0, 90.0)
+
+    # 按照更新后的 `self._t` 值来更新 `self.rain` 属性的值，使用 `clamp` 函数把值限定在 `0.0` 到 `80.0` 的区间内。
+    # 说明 `self.rain` 属性（可能表示降雨量或降雨概率等与雨相关的量化指标）与 `self._t` 直接相关，通过这样的限制确保其值在符合实际意义的范围内变化，比如 `0` 表示无雨，`80` 表示较大降雨情况等（具体含义取决于应用场景）。
+    self.rain = clamp(self._t, 0.0, 80.0)
+
+    # 根据当前对象的 `_increasing` 属性来确定 `delay` 的值。
+    # 如果 `_increasing` 为 `False`，则 `delay` 的值为 `-10.0`；如果 `_increasing` 为 `True`，则 `delay` 的值为 `90.0`。这个 `delay` 值后续会用于计算 `self.puddles` 属性，可能用于体现不同变化趋势下对积水情况的不同影响因素（具体作用需结合完整逻辑分析）。
+    delay = -10.0 if self._increasing else 90.0
+
+    # 使用更新后的 `self._t` 和前面确定的 `delay` 值来计算并更新 `self.puddles` 属性的值，通过 `clamp` 函数将其限制在 `0.0` 到 `85.0` 的区间内。
+    # 由此推测 `self.puddles` 属性（可能表示地面的积水情况或积水相关的量化指标）与 `self._t` 和 `delay` 有关，并且限制在合理区间内，使得积水情况能符合实际场景中的合理变化范围，比如 `0` 表示无积水，`85` 表示较多积水等情况（具体含义结合整体应用来看）。
+    self.puddles = clamp(self._t + delay, 0.0, 85.0)
+
+    # 根据更新后的 `self._t` 值来计算并更新 `self.wetness` 属性的值，将 `self._t` 乘以 `5` 后再通过 `clamp` 函数限制在 `0.0` 到 `100.0` 的区间内。
+    # 可以推断 `self.wetness` 属性（可能表示环境的潮湿程度或物体表面的湿润程度等相关量化指标）与 `self._t` 有倍数关系，并且通过区间限制保证其在合理的百分比范围（`0%` - `100%`）内变化，符合表示湿度情况的实际意义。
+    self.wetness = clamp(self._t * 5, 0.0, 100.0)
+
+    # 根据 `self.clouds` 属性的值来确定 `self.wind` 属性的值。
+    # 如果 `self.clouds` 的值小于等于 `20`，则 `self.wind` 的值设定为 `5.0`；如果 `self.clouds` 的值大于等于 `70`，则 `self.wind` 的值设定为 `90`；否则（即 `20 < self.clouds < 70`），`self.wind` 的值设定为 `40`。这表明 `self.wind`（可能表示风速或风力相关的量化指标）与云量情况存在关联，按照不同的云量区间设定不同的风速值，模拟出天气因素之间相互影响的效果（具体数值对应的实际风速情况需结合应用场景确定）。
+    self.wind = 5.0 if self.clouds <= 20 else 90 if self.clouds >= 70 else 40
+
+    # 根据更新后的 `self._t` 值来计算并更新 `self.fog` 属性的值，通过 `clamp` 函数将 `self._t - 10` 的结果限制在 `0.0` 到 `30.0` 的区间内。
+    # 说明 `self.fog` 属性（可能表示雾的浓度或能见度相关的量化指标）与 `self._t` 相关，并且经过这样的计算和区间限制，使其符合雾在实际场景中合理的变化范围，例如 `0` 表示无雾，`30` 表示浓雾等情况（具体含义结合整体应用判断）。
+    self.fog = clamp(self._t - 10, 0.0, 30.0)
+
+    # 判断 `self._t` 的值是否等于 `-250.0`，如果是，则将 `_increasing` 属性设置为 `True`。
+    # 这可能意味着当 `self._t` 达到下限值时，相关属性要开始正向增加，改变整体的变化趋势，用于控制天气或环境属性循环变化的逻辑（例如模拟从恶劣天气逐渐变好的转折点）。
+    if self._t == -250.0:
+        self._increasing = True
+
+    # 判断 `self._t` 的值是否等于 `100.0`，如果是，则将 `_increasing` 属性设置为 `False`。
+    # 与上面的逻辑相对应，当 `self._t` 达到上限值时，相关属性要开始反向减少，实现天气或环境属性在规定范围内来回变化的模拟效果（例如模拟从较好天气逐渐变差的转折点）。
+    if self._t == 100.0:
+        self._increasing = False
 
     def __str__(self):
         return 'Storm(clouds=%d%%, rain=%d%%, wind=%d%%)' % (self.clouds, self.rain, self.wind)
