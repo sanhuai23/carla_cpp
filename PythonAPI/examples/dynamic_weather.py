@@ -240,14 +240,26 @@ def main():
     elapsed_time = 0.0
 
     while True:
-        timestamp = world.wait_for_tick(seconds=30.0).timestamp
-        elapsed_time += timestamp.delta_seconds
-        if elapsed_time > update_freq:
-            weather.tick(speed_factor * elapsed_time)
-            world.set_weather(weather.weather)
-            sys.stdout.write('\r' + str(weather) + 12 * ' ')
-            sys.stdout.flush()
-            elapsed_time = 0.0
+    # 这是一个无限循环，意味着只要程序运行到这里，就会一直重复执行循环体内部的代码，通常用于持续监测或定时执行某些操作的场景，比如不断更新游戏世界中的天气情况等（结合下面代码推测）。
+
+    # 调用 `world` 对象的 `wait_for_tick` 方法，传入参数 `seconds=30.0`，表示等待世界（可能是模拟的游戏世界、虚拟环境等，具体取决于上下文）的一次更新，最长等待时间为30秒。
+    # 这个方法返回一个包含时间戳（`timestamp`）等信息的对象，然后从中获取时间戳信息赋值给 `timestamp` 变量，时间戳里包含了此次世界更新所对应的时间相关数据，比如时间间隔等信息（具体取决于 `wait_for_tick` 方法返回对象的结构定义）。
+    timestamp = world.wait_for_tick(seconds=30.0).timestamp
+    # 将获取到的时间戳里的时间间隔（`delta_seconds`）累加到 `elapsed_time` 变量上，用于累计从开始到当前经过的总时间，方便后续判断是否达到更新频率的条件。
+    elapsed_time += timestamp.delta_seconds
+    # 判断累计经过的时间（`elapsed_time`）是否大于预先设定的更新频率（`update_freq`），这里的 `update_freq` 应该是一个定义好的时间阈值（单位通常是秒），用于控制相关操作多久执行一次更新。
+    if elapsed_time > update_freq:
+        # 如果经过时间超过了更新频率，就调用 `weather` 对象的 `tick` 方法，传入 `speed_factor * elapsed_time` 作为参数。
+        # `speed_factor` 可能是一个用于调整更新速度的系数（比如加快或减慢天气变化的速度等），通过乘以 `elapsed_time` 来根据实际经过的时间以及速度系数来更新天气相关的各种属性（假设 `weather` 对象的 `tick` 方法实现了天气属性随时间变化的更新逻辑，类似前面介绍的相关 `tick` 方法功能）。
+        weather.tick(speed_factor * elapsed_time)
+        # 使用 `world` 对象的 `set_weather` 方法，将 `weather` 对象的 `weather` 属性（从命名推测是包含完整天气状况信息的属性）设置给世界，也就是更新世界中的天气情况，使其与 `weather` 对象所代表的天气状态保持一致，实现模拟环境中天气的动态更新。
+        world.set_weather(weather.weather)
+        # 使用 `sys.stdout.write` 函数向标准输出（通常是终端控制台）写入信息，这里先写入一个回车符 `'\r'`，用于将光标移到当前行的开头位置（实现覆盖当前行内容的效果，常用于实时更新显示信息的场景），然后拼接上 `weather` 对象转换为字符串后的内容（假设 `weather` 对象定义了 `__str__` 方法来友好展示其天气状态信息），再拼接12个空格，目的可能是为了清除之前显示内容后面多余的部分或者进行一定的格式对齐等操作。
+        sys.stdout.write('\r' + str(weather) + 12 * ' ')
+        # 调用 `sys.stdout.flush()` 方法，强制将缓冲区中的内容立即输出到标准输出设备（终端），确保前面写入的信息能及时显示出来，而不是等待缓冲区满了才输出，保证实时更新显示的效果。
+        sys.stdout.flush()
+        # 将累计经过的时间 `elapsed_time` 重置为0.0，以便开始下一轮的时间累计和更新频率判断，重新计算下一次满足更新条件的时间点。
+        elapsed_time = 0.0
 
 
 if __name__ == '__main__':
