@@ -143,7 +143,14 @@ class Storm(object):
         self._increasing = False
 
     def __str__(self):
-        return 'Storm(clouds=%d%%, rain=%d%%, wind=%d%%)' % (self.clouds, self.rain, self.wind)
+    # `__str__` 是Python中的一个特殊方法（也叫魔术方法），当使用 `print()` 函数打印对象或者将对象转换为字符串（例如使用 `str()` 函数）时，这个方法会被自动调用。
+    # 它的主要作用是定义对象的字符串表示形式，方便开发者直观地查看对象的相关属性信息，以一种友好的、易于阅读的方式呈现对象的关键内容。
+
+    # 通过字符串格式化的方式构建并返回一个字符串，这个字符串描述了与当前对象相关的部分天气属性信息，格式为 'Storm(clouds=%d%%, rain=%d%%, wind=%d%%)'。
+    # 其中 `%d` 是格式化占位符，表示要替换为整数类型的数据，`%%` 用于在字符串中输出一个 `%` 符号（因为 `%` 在格式化字符串中有特殊含义，所以要输出它自身需要使用 `%%` 转义）。
+    # 这里分别将对象的 `self.clouds`、`self.rain` 和 `self.wind` 属性的值按照顺序替换到对应的占位符位置，从而生成一个形如 'Storm(clouds=30%, rain=20%, wind=50%)' 的字符串（这里的 `30`、`20`、`50` 只是示例数值，实际由对应属性的真实值决定）。
+    # 最终返回的这个字符串就是该对象在被转换为字符串或者打印时呈现给用户的内容，用于展示当前对象所代表的天气状况中云量、降雨量和风速这几个关键属性的百分比情况。
+    return 'Storm(clouds=%d%%, rain=%d%%, wind=%d%%)' % (self.clouds, self.rain, self.wind)
 
 
 class Weather(object):
