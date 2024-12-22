@@ -55,17 +55,30 @@ def get_actor_blueprints(world, filter, generation):
         return bps
 
     try:
-        int_generation = int(generation)
-        # Check if generation is in available generations
-        if int_generation in [1, 2, 3]:
-            bps = [x for x in bps if int(x.get_attribute('generation')) == int_generation]
-            return bps
-        else:
-            print("   Warning! Actor Generation is not valid. No actor will be spawned.")
-            return []
-    except:
+    # 尝试将变量 `generation` 的值转换为整数类型，并赋值给 `int_generation` 变量。
+    # 这里假设 `generation` 原本可能是字符串等其他可转换为整数的类型，通过这个转换操作以便后续基于整数类型的值进行条件判断等操作，
+    # 如果 `generation` 的值无法正确转换为整数（例如它包含非数字字符等情况），就会抛出异常，进入下面的 `except` 块进行相应处理。
+    int_generation = int(generation)
+
+    # 检查转换后的整数类型的 `int_generation` 值是否在指定的可用代际列表 `[1, 2, 3]` 中。
+    # 这里推测是在对某种“演员”（Actor，可能是游戏、模拟场景等中的实体对象）的代际属性进行验证，判断其是否属于合法的代际范围。
+    if int_generation in [1, 2, 3]:
+        # 如果 `int_generation` 的值在合法范围内（即等于1、2或3），则使用列表推导式对 `bps` 列表进行过滤筛选操作。
+        # 对于 `bps` 列表中的每个元素 `x`（从命名推测 `bps` 可能是包含多个“蓝图”（Blueprint）对象的列表，这些蓝图可能用于创建演员实体），
+        # 通过获取其 `'generation'` 属性并转换为整数后，与 `int_generation` 进行比较，只保留那些代际属性值与当前验证通过的 `int_generation` 值相等的元素，重新构建 `bps` 列表。
+        # 最终经过筛选后的 `bps` 列表将作为结果返回，可能后续用于基于符合特定代际要求的蓝图来创建相应的演员实体。
+        bps = [x for x in bps if int(x.get_attribute('generation')) == int_generation]
+        return bps
+    else:
+        # 如果 `int_generation` 的值不在 `[1, 2, 3]` 这个合法的代际范围内，说明提供的演员代际属性是无效的。
+        # 此时打印一条警告信息，提示用户演员代际不合法，并且返回一个空列表，意味着不会基于当前的配置去创建任何演员实体，因为代际属性不符合要求。
         print("   Warning! Actor Generation is not valid. No actor will be spawned.")
         return []
+except:
+    # 如果在前面尝试将 `generation` 转换为整数（`int(generation)` 这一行）或者后续基于代际进行列表筛选等操作过程中出现了任何异常（例如类型转换错误、属性获取错误等情况），
+    # 都会进入这个 `except` 块进行异常处理。同样在这里打印一条警告信息，告知用户演员代际不合法，然后返回一个空列表，表示不会创建任何演员实体，以一种相对安全、容错的方式处理异常情况，避免程序因异常而崩溃。
+    print("   Warning! Actor Generation is not valid. No actor will be spawned.")
+    return []
 
 def main():
     argparser = argparse.ArgumentParser(
