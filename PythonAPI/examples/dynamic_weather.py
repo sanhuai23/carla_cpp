@@ -207,36 +207,64 @@ class Weather(object):
 
 
 def main():
+    # 创建一个 `argparse.ArgumentParser` 对象，用于解析命令行参数。
+    # `description` 参数传入 `__doc__`，通常 `__doc__` 是函数、类或模块开头的文档字符串，在这里用于给命令行参数解析器提供一个描述信息，方便用户在查看帮助时了解这个脚本的大致功能。
     argparser = argparse.ArgumentParser(
         description=__doc__)
+
+    # 使用 `argparser.add_argument` 方法添加一个名为 `--host` 的命令行参数选项。
+    # `metavar` 参数用于在帮助信息中显示参数的占位符名称（这里显示为 `H`），使得帮助信息更清晰规范。
+    # `default` 参数指定了该参数的默认值为 `127.0.0.1`，也就是如果用户在命令行中没有指定这个参数的值，程序将使用这个默认的IP地址。
+    # `help` 参数提供了关于这个参数的帮助文本，用于向用户解释该参数的作用，这里说明它是主机服务器的IP地址。
     argparser.add_argument(
         '--host',
         metavar='H',
         default='127.0.0.1',
         help='IP of the host server (default: 127.0.0.1)')
+
+    # 添加一个名为 `-p` 或 `--port` 的命令行参数选项，用于指定TCP端口号。
+    # `metavar` 设置为 `P`，用于帮助信息展示占位符。
+    # `default` 设定为 `2000`，表示默认监听的TCP端口是 `2000`，如果用户未指定该参数值，程序就使用这个默认端口。
+    # `type=int` 明确指定了该参数输入的值应该被转换为整数类型，确保端口号是合法的整数格式。
+    # `help` 文本解释了这个参数的用途是指定要监听的TCP端口。
     argparser.add_argument(
         '-p', '--port',
         metavar='P',
         default=2000,
         type=int,
         help='TCP port to listen to (default: 2000)')
+
+    # 再添加一个名为 `-s` 或 `--speed` 的命令行参数选项，用于指定天气变化的速率。
+    # `metavar` 设为 `FACTOR`，在帮助信息里作为参数的占位表示。
+    # `default` 值为 `1.0`，意味着如果用户不提供该参数，天气变化将按照默认速率 `1.0` 进行（具体这个速率如何影响天气变化取决于后续代码逻辑）。
+    # `type=float` 规定了该参数输入的值需要转换为浮点数类型，因为速率通常可以是小数形式。
+    # `help` 内容说明这个参数是控制天气变化的速率的。
     argparser.add_argument(
         '-s', '--speed',
         metavar='FACTOR',
         default=1.0,
         type=float,
         help='rate at which the weather changes (default: 1.0)')
+
+    # 调用 `argparser.parse_args()` 方法来解析命令行传入的实际参数，将解析后的参数结果保存在 `args` 变量中，后续可以通过 `args` 来访问各个参数的值。
     args = argparser.parse_args()
 
+    # 从解析后的命令行参数 `args` 中获取天气变化速率参数的值，并赋值给 `speed_factor` 变量，这个变量后续将用于控制天气更新相关操作的速度快慢。
     speed_factor = args.speed
+    # 根据天气变化速率 `speed_factor` 来计算更新频率（`update_freq`）。这里计算方式是 `0.1` 除以 `speed_factor`，意味着天气更新频率会随着设定的变化速率动态调整，例如 `speed_factor` 越大，`update_freq` 越小，天气更新就会越频繁（具体更新逻辑在后续相关代码中实现）。
     update_freq = 0.1 / speed_factor
 
+    # 创建一个 `carla.Client` 对象，使用从命令行参数中获取到的主机IP（`args.host`）和端口号（`args.port`）进行初始化，这个客户端对象将用于和Carla模拟器（从代码上下文推测是与Carla相关的应用场景）进行通信，发送请求并接收响应等操作。
     client = carla.Client(args.host, args.port)
+    # 为客户端对象设置操作超时时间为 `2.0` 秒，避免客户端在等待服务器响应时无限期阻塞，确保程序的响应性，如果超过这个时间没有得到响应，会抛出相应的超时异常。
     client.set_timeout(2.0)
+    # 通过客户端对象的 `get_world` 方法获取当前Carla模拟器中的世界对象（这个世界对象包含了模拟场景中的各种实体、环境信息等内容，是后续操作的基础，比如获取天气、添加车辆等）。
     world = client.get_world()
 
+    # 创建一个 `Weather` 类的实例对象，传入当前世界对象（`world`）的天气信息（通过 `world.get_weather()` 获取）进行初始化，这个 `Weather` 对象后续将用于管理和更新天气相关的属性等操作（比如前面提到的按照一定速率和频率更新天气情况）。
     weather = Weather(world.get_weather())
 
+    # 初始化一个变量 `elapsed_time` 为 `0.0`，这个变量通常用于累计时间，比如在后续循环中记录从开始到当前所经过的时间，以便根据时间来判断是否达到更新天气等操作的条件（结合前面提到的 `update_freq` 等逻辑来综合判断）。
     elapsed_time = 0.0
 
     while True:
