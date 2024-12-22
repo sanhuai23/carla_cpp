@@ -133,11 +133,26 @@ if (LIBCARLA_BUILD_DEBUG)
 endif()
 
 # 构建发布版本
+# 判断是否定义了 LIBCARLA_BUILD_RELEASE 变量，若该变量的值为真（通常用于指示构建发布版本），则进入下面花括号内的代码块执行相应操作。
+# 也就是说，后续的配置都是专门针对项目的发布版本构建而设置的。
 if (LIBCARLA_BUILD_RELEASE)
-  # Specific options for release.
-  set_target_properties(libcarla_test_${carla_config}_release PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS_RELEASE}")
-  target_link_libraries(libcarla_test_${carla_config}_release "carla_${carla_config}${carla_target_postfix}")
-  if (CMAKE_BUILD_TYPE STREQUAL "Client")
-      target_link_libraries(libcarla_test_${carla_config}_release "${BOOST_LIB_PATH}/libboost_filesystem.a")
-  endif()
+    # 以下是针对发布版本的特定选项设置部分的注释说明
+
+    # 设置名为 libcarla_test_${carla_config}_release 的目标（可能是可执行文件、库等）的编译属性，
+    # 具体是将编译标志（COMPILE_FLAGS）设定为 ${CMAKE_CXX_FLAGS_RELEASE}，这里的 ${CMAKE_CXX_FLAGS_RELEASE} 是 CMake 中预定义的 C++ 发布版本编译标志，
+    # 例如这些标志可能会开启优化选项，以提升生成的可执行文件或库在性能方面的表现，同时可能会去除一些调试相关的信息等，符合发布版本的构建需求。
+    set_target_properties(libcarla_test_${carla_config}_release PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS_RELEASE}")
+
+    # 将名为 "carla_${carla_config}${carla_target_postfix}" 的库链接到 libcarla_test_${carla_config}_release 目标上，
+    # 如此一来，在构建 libcarla_test_${carla_config}_release 时就能利用 "carla_${carla_config}${carla_target_postfix}" 库所提供的功能了，
+    # 其中 ${carla_config} 和 ${carla_target_postfix} 是项目自定义的与配置及目标后缀相关的变量。
+    target_link_libraries(libcarla_test_${carla_config}_release "carla_${carla_config}${carla_target_postfix}")
+
+    # 进行一个条件判断，查看当前的 CMake 构建类型（CMAKE_BUILD_TYPE）是否和 "Client" 相等，如果相等，也就是处于客户端构建场景下时，执行下面花括号内的代码。
+    if (CMAKE_BUILD_TYPE STREQUAL "Client")
+        # 将位于 ${BOOST_LIB_PATH} 目录下的 libboost_filesystem.a 库链接到 libcarla_test_${carla_config}_release 目标上，
+        # 这使得在客户端构建的发布版本中可以运用 Boost 文件系统库（libboost_filesystem.a）所具备的功能，
+        # 例如处理文件的读写、目录操作等相关事务，前提是项目中依赖了该库的功能。
+        target_link_libraries(libcarla_test_${carla_config}_release "${BOOST_LIB_PATH}/libboost_filesystem.a")
+    endif()
 endif()
