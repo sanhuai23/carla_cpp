@@ -110,15 +110,29 @@
 // HACK(Andrei): Disable exceptions as they are not available in Unreal engine
 #define PUGIXML_NOEXCEPT
 
-// If C++ is 2011 or higher, add 'noexcept' specifiers
+// 这是一段基于预处理指令的代码片段，其主要目的是根据当前所使用的 C++ 标准以及编译器版本情况，
+// 来决定是否定义名为“PUGIXML_NOEXCEPT”的宏，该宏通常用于为函数添加“noexcept”异常说明特性（如果支持的话）。
+
+// 首先通过#ifndef指令来检查是否尚未定义“PUGIXML_NOEXCEPT”宏。若该宏还未被定义（意味着尚未确定是否要添加“noexcept”相关的设置），
+// 则进入下面的条件编译部分进行进一步判断与宏的定义操作，这样做是为了避免重复定义该宏，确保整个编译单元内其定义的唯一性与合理性。
 #ifndef PUGIXML_NOEXCEPT
-#	if __cplusplus >= 201103
-#		define PUGIXML_NOEXCEPT noexcept
-#	elif defined(_MSC_VER) && _MSC_VER >= 1900
-#		define PUGIXML_NOEXCEPT noexcept
-#	else
-#		define PUGIXML_NOEXCEPT
-#	endif
+    // 以下是依据不同的条件来判断是否应该将“PUGIXML_NOEXCEPT”宏定义为“noexcept”，以适配不同的 C++ 标准及编译器环境。
+
+    // 判断当前所使用的 C++ 标准是否是 2011 及更高版本（通过预定义宏“__cplusplus”的值来判断，其值为 201103 代表 C++11 标准）。
+    // 如果满足是 C++11 或更高版本这一条件，意味着编译器支持“noexcept”特性，此时执行下面的代码块，将“PUGIXML_NOEXCEPT”宏定义为“noexcept”。
+    // 这样在后续代码中使用该宏时，就相当于使用了“noexcept”，用于表明对应函数不会抛出异常（当然，实际是否真的不抛异常还依赖程序员遵循此约定编写代码）。
+    #if __cplusplus >= 201103
+        #define PUGIXML_NOEXCEPT noexcept
+    // 如果当前不是 C++11 及更高版本，接着判断是否是微软的 Visual C++ 编译器（通过预定义宏“_MSC_VER”来识别编译器，其值代表编译器版本），
+    // 并且版本是否大于等于 1900（对应 Visual Studio 2015，从这个版本开始 Visual C++ 对“noexcept”特性有较好支持）。
+    // 若满足这些条件，同样说明编译器支持“noexcept”特性，那么执行下面代码块，把“PUGIXML_NOEXCEPT”宏定义为“noexcept”。
+    #elif defined(_MSC_VER) && _MSC_VER >= 1900
+        #define PUGIXML_NOEXCEPT noexcept
+    // 如果既不满足是 C++11 及更高版本的条件，也不符合微软 Visual C++ 编译器特定版本要求，那就执行下面的代码块，
+    // 将“PUGIXML_NOEXCEPT”宏定义为空，意味着在这种情况下对应的代码可能不具备“noexcept”相关的特性支持，或者暂不使用该特性。
+    #else
+        #define PUGIXML_NOEXCEPT
+    #endif
 #endif
 
 // Some functions can not be noexcept in compact mode
