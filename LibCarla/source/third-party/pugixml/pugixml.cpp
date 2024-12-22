@@ -440,35 +440,63 @@ PUGI__NS_BEGIN
 		}
 	};
 
-	PUGI__FN_NO_INLINE bool compact_hash_table::rehash(size_t count)
-	{
-		size_t capacity = 32;
-		while (count >= capacity - capacity / 4)
-			capacity *= 2;
+	// 函数定义，返回类型为 PUGI__FN_NO_INLINE bool，表明这是一个不内联（具体是否内联还可能受编译设置等因素影响）的函数，
+// 函数属于 compact_hash_table 类，功能是进行哈希表的重哈希操作，参数 count 可能表示期望的元素数量或者某种容量相关的计数。
+PUGI__FN_NO_INLINE bool compact_hash_table::rehash(size_t count)
+{
+    // 初始化哈希表的初始容量为32，通常这是一个起始的容量大小，后续会根据实际传入的 count 参数来动态调整。
+    size_t capacity = 32;
 
-		compact_hash_table rt;
-		rt._capacity = capacity;
-		rt._items = static_cast<item_t*>(xml_memory::allocate(sizeof(item_t) * capacity));
+    // 循环调整容量，只要传入的 count 参数大于等于当前容量减去当前容量的四分之一（即保持一定的负载因子，避免哈希表过于拥挤），
+    // 就将容量翻倍，这样可以保证哈希表有足够的空间来容纳预期数量的元素，减少冲突等情况。
+    while (count >= capacity - capacity / 4)
+        capacity *= 2;
 
-		if (!rt._items)
-			return false;
+    // 创建一个临时的 compact_hash_table 对象 rt，用于在重哈希过程中构建新的哈希表结构，
+    // 后续会将原哈希表中的元素逐步迁移到这个新的哈希表中。
+    compact_hash_table rt;
 
-		memset(rt._items, 0, sizeof(item_t) * capacity);
+    // 设置临时哈希表 rt 的容量为刚才计算好的 capacity 值，这个容量决定了新哈希表能容纳的元素数量上限。
+    rt._capacity = capacity;
 
-		for (size_t i = 0; i < _capacity; ++i)
-			if (_items[i].key)
-				rt.insert(_items[i].key, _items[i].value);
+    // 为临时哈希表 rt 分配内存空间，用于存储哈希表中的元素（item_t 类型），根据计算出的容量乘以每个元素所占的内存大小（sizeof(item_t)）来分配。
+    // xml_memory::allocate 应该是一个自定义的内存分配函数，用于获取合适的内存块。
+    rt._items = static_cast<item_t*>(xml_memory::allocate(sizeof(item_t) * capacity));
 
-		if (_items)
-			xml_memory::deallocate(_items);
+    // 检查内存分配是否成功，如果分配失败（即 rt._items 为 nullptr），则返回 false，表示重哈希操作无法进行。
+    if (!rt._items)
+        return false;
 
-		_capacity = capacity;
-		_items = rt._items;
+    // 将新分配的内存区域清零，也就是把每个字节都设置为0，这一步操作可以确保新哈希表中的元素初始状态是正确的，
+    // 避免出现未初始化的垃圾数据影响后续的操作，memset 是 C/C++ 标准库中用于内存设置的函数。
+    memset(rt._items, 0, sizeof(item_t) * capacity);
 
-		assert(_count == rt._count);
+    // 遍历原哈希表（通过 this 指针隐式访问当前对象的成员变量，也就是 _capacity 和 _items）中的所有元素位置（从 0 到原哈希表容量 _capacity - 1），
+    // 如果某个位置的元素的 key 不为空（表示该位置有实际存储的元素），则将该元素插入到临时哈希表 rt 中，
+    // 通过调用 rt.insert 函数（这里假设 compact_hash_table 类有这样一个插入元素的成员函数）来完成元素的迁移。
+    for (size_t i = 0; i < _capacity; ++i)
+        if (_items[i].key)
+            rt.insert(_items[i].key, _items[i].value);
 
-		return true;
-	}
+    // 如果原哈希表的 _items 指针不为空（即原哈希表之前有分配内存），则调用 xml_memory::deallocate 函数（自定义的内存释放函数）来释放原哈希表占用的内存，
+    // 释放不再需要的内存资源，避免内存泄漏。
+    if (_items)
+        xml_memory::deallocate(_items);
+
+    // 将当前哈希表（也就是调用 rehash 函数的这个对象）的容量更新为新的容量值 capacity，使其反映重哈希后的实际容量情况。
+    _capacity = capacity;
+
+    // 将当前哈希表的元素指针 _items 指向临时哈希表 rt 的元素指针所指向的内存区域，这样就完成了元素的迁移，
+    // 使得当前哈希表使用新的、经过重哈希调整后的内存布局和元素存储情况。
+    _items = rt._items;
+
+    // 使用断言（assert）来检查当前哈希表的元素数量 _count 是否和临时哈希表 rt 的元素数量 _count 相等，
+    // 理论上经过正确的元素迁移操作后，两者应该是相等的，如果不相等则说明程序可能存在逻辑错误，断言会在调试版本中触发错误提示，帮助发现问题。
+    assert(_count == rt._count);
+
+    // 如果重哈希操作顺利完成，所有步骤都没有出现问题，则返回 true，表示重哈希成功。
+    return true;
+}
 
 PUGI__NS_END
 #endif
