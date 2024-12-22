@@ -87,13 +87,24 @@
 #	endif
 #endif
 
-// If the platform is known to have move semantics support, compile move ctor/operator implementation
+// 这是一段预处理指令相关的代码，其目的是判断当前平台是否支持移动语义（move semantics），
+// 如果支持的话，就定义一个名为 PUGIXML_HAS_MOVE 的宏，以便后续在编译时决定是否编译移动构造函数（move ctor）以及移动赋值运算符（move operator）相关的实现代码。
+
+// 首先通过#ifndef指令判断是否尚未定义 PUGIXML_HAS_MOVE 这个宏，如果还没有定义（即当前还不确定平台是否支持移动语义），才进入下面的条件编译部分进行判断和定义。
+// 这样可以避免重复定义该宏，保证在整个编译单元中该宏的定义是唯一且符合实际平台情况的。
 #ifndef PUGIXML_HAS_MOVE
-#	if __cplusplus >= 201103
-#		define PUGIXML_HAS_MOVE
-#	elif defined(_MSC_VER) && _MSC_VER >= 1600
-#		define PUGIXML_HAS_MOVE
-#	endif
+    // 以下是根据不同的条件来判断是否支持移动语义，进而决定是否定义 PUGIXML_HAS_MOVE 宏。
+
+    // 判断当前使用的 C++ 标准是否是 C++11 及以上版本（__cplusplus 是一个预定义的宏，其值表示当前使用的 C++ 标准版本，例如 201103 代表 C++11），
+    // 如果满足是 C++11 或更高版本这个条件，说明编译器支持移动语义，那么就执行下面的代码块，定义 PUGIXML_HAS_MOVE 宏。
+    #if __cplusplus >= 201103
+        #define PUGIXML_HAS_MOVE
+    // 如果当前不是 C++11 及以上版本，再判断是否是微软的 Visual C++ 编译器（_MSC_VER 是微软 Visual C++ 编译器预定义的宏，用于标识编译器版本），
+    // 并且版本是否大于等于 1600（Visual Studio 2010 对应的编译器版本，从这个版本开始 Visual C++ 对 C++11 的部分特性包括移动语义有了一定支持），
+    // 如果满足这些条件，同样说明编译器支持移动语义，于是执行下面的代码块来定义 PUGIXML_HAS_MOVE 宏。
+    #elif defined(_MSC_VER) && _MSC_VER >= 1600
+        #define PUGIXML_HAS_MOVE
+    #endif
 #endif
 
 // HACK(Andrei): Disable exceptions as they are not available in Unreal engine
