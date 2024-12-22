@@ -37,15 +37,30 @@
 #	include <string>
 #endif
 
-// Macro for deprecated features
+// 这是一段预处理指令部分的代码，用于定义一个宏（PUGIXML_DEPRECATED）来标记那些已被弃用的特性或功能。
+
+// 首先判断是否已经定义了 PUGIXML_DEPRECATED 宏，如果没有定义（通过#ifndef来判断），才进入下面的条件编译部分进行定义。
+// 这样可以避免重复定义该宏，确保整个编译单元内该宏只有一种定义方式。
 #ifndef PUGIXML_DEPRECATED
-#	if defined(__GNUC__)
-#		define PUGIXML_DEPRECATED __attribute__((deprecated))
-#	elif defined(_MSC_VER) && _MSC_VER >= 1300
-#		define PUGIXML_DEPRECATED __declspec(deprecated)
-#	else
-#		define PUGIXML_DEPRECATED
-#	endif
+    // 以下是根据不同的编译器进行条件判断，来分别定义 PUGIXML_DEPRECATED 宏的不同实现形式。
+
+    // 判断当前是否使用的是 GNU 编译器（__GNUC__ 是 GNU C/C++ 编译器预定义的宏，用于标识编译器类型），
+    // 如果是 GNU 编译器，就执行下面的代码块来定义 PUGIXML_DEPRECATED 宏。
+    #if defined(__GNUC__)
+        // 对于 GNU 编译器，使用 __attribute__((deprecated)) 特性来定义 PUGIXML_DEPRECATED 宏。
+        // 当使用这个宏标记某个函数、变量等实体时，编译器会在使用这些被标记的已弃用的实体时给出相应的警告信息，提示开发者不应该再使用它们。
+        #define PUGIXML_DEPRECATED __attribute__((deprecated))
+    // 如果不是 GNU 编译器，再判断是否是微软的 Visual C++ 编译器（_MSC_VER 是微软 Visual C++ 编译器预定义的宏，用于标识编译器版本，这里要求版本大于等于 1300），
+    // 如果满足条件，则执行下面的代码块来定义 PUGIXML_DEPRECATED 宏。
+    #elif defined(_MSC_VER) && _MSC_VER >= 1300
+        // 对于微软 Visual C++ 编译器，使用 __declspec(deprecated) 语法来定义 PUGIXML_DEPRECATED 宏。
+        // 同样，当某个实体被该宏标记后，在编译时若使用了这个已弃用的实体，编译器会发出警告，提醒开发者该特性已不建议使用。
+        #define PUGIXML_DEPRECATED __declspec(deprecated)
+    // 如果既不是 GNU 编译器，也不满足微软 Visual C++ 编译器的条件，那就执行下面的代码块，定义一个空的 PUGIXML_DEPRECATED 宏。
+    // 这种情况下可能意味着当前编译器不支持方便地标记弃用特性的语法，所以只能简单定义为空宏，不会产生相应的弃用警告效果。
+    #else
+        #define PUGIXML_DEPRECATED
+    #endif
 #endif
 
 // If no API is defined, assume default
